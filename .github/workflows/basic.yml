@@ -7,7 +7,6 @@ on:
   pull_request:
     paths-ignore:
       - '**/*.md'
-    branches: [ "master" ]
 
 env:
   CMAKE_BUILD_TYPE: Debug
@@ -35,8 +34,13 @@ jobs:
 
     - name: Test Examples
       shell: bash
-      working-directory: $CMAKE_BUILD_DIR
+      working-directory: ${{ env.CMAKE_BUILD_DIR }}
       run: |
-        ./example << EOF
+        if [[ ${{ matrix.os }} == windows* ]]; then
+          EXAMPLE="$CMAKE_BUILD_TYPE/example.exe"
+        else
+          EXAMPLE="./example"
+        fi
+        $EXAMPLE << EOF
         quit
         EOF
