@@ -29,3 +29,11 @@ jobs:
         cd  $CMAKE_BUILD_DIR
         cmake -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE ..
         cmake --build .
+
+    - name: Test Examples
+      shell: bash
+      working-directory: $CMAKE_BUILD_DIR
+      run: |
+        ./example << EOF
+        quit
+        EOF
