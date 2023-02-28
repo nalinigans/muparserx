@@ -41,6 +41,8 @@ jobs:
         else
           EXAMPLE="./example"
         fi
-        $EXAMPLE << EOF
+        $EXAMPLE &> example.log << EOF
         quit
         EOF
+        cat example.log
+        grep -e "Test passed.*expressions" example.log || (grep -e "Test failed.*expressions" example.log; exit 1)
