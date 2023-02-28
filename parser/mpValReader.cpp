@@ -35,7 +35,6 @@
 #include "mpValReader.h"
 #include "mpError.h"
 
-
 MUP_NAMESPACE_START
 
 //------------------------------------------------------------------------------
@@ -62,7 +61,38 @@ bool DblValReader::IsValue(const char_type* a_szExpr, int& a_iPos, Value& a_Val)
 	stream >> fVal;
 
 	if (stream.fail())
+	{
+#ifdef __APPLE__
+	// Workaround for MacOS/clang not parsing strings like 3i with std::stringstream
+	// See https://discourse.llvm.org/t/different-behavior-from-stringstream-operator-in-libc-vs-libstdc/57482
+		fVal = std::atof(a_szExpr + a_iPos);
+		if (fVal)
+		{
+			string_type str(a_szExpr + a_iPos);
+			auto i=0u;
+			for (; i<str.length(); i++)
+			{
+				const char c = str[i];
+				if (!((c >= '0' && c <= '9') || (c == '.')))
+				{
+					if (c == 'i')
+					{
+						a_Val = cmplx_type(0.0, fVal);
+						a_iPos += (i+1);
+						return true;
+					}
+					else
+					{
+						a_Val = cmplx_type(fVal, 0.0);
+						a_iPos += i;
+						return true;
+					}
+				}
+			}
+		}
+#endif
 		return false;
+	}
 
 	if (stream.eof())
 	{
